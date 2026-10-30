@@ -3,6 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Keeps the ledger out of search results while it carries every price and note and
+     has no redacted variant yet. It is NOT access control: the page stays readable by
+     anyone with the link, and a public repo is still browsable from the profile.
+     A robots.txt would not work here: GitHub serves project pages under a subpath, and
+     robots.txt is only honoured at the domain root, which belongs to a different repo.
+     The meta tag is the one mechanism that applies. -->
+<meta name="robots" content="noindex, nofollow">
 <title>Drinks Ledger</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
