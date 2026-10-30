@@ -1,6 +1,0 @@
-# Nothing from the workspace belongs here. Only the published page is committed, and
-# tools/deploy.py fails closed if anything else turns up in this folder.
-*.xlsx
-*.py
-Thumbs.db
-.DS_Store
