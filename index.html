@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Keeps the ledger out of search results while it carries every price and note and
+     has no redacted variant yet. It is NOT access control: the page stays readable by
+     anyone with the link, and a public repo is still browsable from the profile.
+     A robots.txt would not work here: GitHub serves project pages under a subpath, and
+     robots.txt is only honoured at the domain root, which belongs to a different repo.
+     The meta tag is the one mechanism that applies. -->
+<meta name="robots" content="noindex, nofollow">
+<title>Liquid Assets</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="css/app.css?v=0f962147">
+</head>
+<body>
+<!-- The scene is the page's background, fixed to the viewport and behind everything.
+     Decorative, so it is hidden from screen readers; the stage caption is the readable
+     part, and the shelf and the wake button are real controls sitting over it. -->
+<canvas class="scene-bg" id="scene" aria-hidden="true"></canvas>
+<div class="wrap">
+  <header class="mast">
+    <!-- The menu lives top left and the tabs live inside it. It sits faint until
+         hovered, which is what was asked for, but NOT hover-only: a phone has no
+         hover at all, so .burger gets a full-opacity rule under (hover:none). Same
+         reasoning as the welcome panel arrows. -->
+    <div class="menu-wrap" id="menu-wrap">
+      <button class="burger" id="burger" type="button"
+              aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav" id="nav" hidden></nav>
+    </div>
+    <span class="mast-mark">Liquid Assets</span>
+    <button class="theme-btn" id="theme-btn" type="button">Dark</button>
+  </header>
+
+  <section class="screen" id="s-welcome">
+    <div class="hero">
+      <h1 class="hero-title">Liquid Assets</h1>
+      <!-- Invisible, but a real button: once he is out this is the only way on, and a
+           canvas hit test would answer a mouse and nothing else. -->
+      <button class="scene-wake" id="scene-wake" type="button" hidden>Wake him up</button>
+      <div class="shelf" id="shelf"></div>
+      <p class="hero-cap" id="scene-cap" aria-live="off"></p>
+    </div>
+    <div class="sheet">
+      <div class="subs" id="subs"></div>
+      <div id="welcome-info" hidden></div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-list">
+    <div class="controls">
+      <div class="ctl-row">
+        <input class="search" id="q" type="search" placeholder="Search name, producer, origin, rice, note">
+        <select id="sort" aria-label="Sort by">
+          <option value="name">Name A to Z</option>
+          <option value="price-desc">Price, high to low</option>
+          <option value="price-asc">Price, low to high</option>
+          <option value="abv-desc">ABV, high to low</option>
+        </select>
+      </div>
+      <div class="ctl-row"><span class="ctl-lab">Category</span><span id="cat-pills"></span></div>
+      <div class="ctl-row"><span class="ctl-lab">Grade</span><span id="grade-pills"></span></div>
+      <div class="ctl-row">
+        <span id="fav-pills"></span>
+        <button class="reset" id="reset" type="button">Clear all filters</button>
+      </div>
+    </div>
+    <p class="count" id="count"></p>
+    <div class="list" id="list"></div>
+    <nav class="pager" id="pager" aria-label="Pages"></nav>
+  </section>
+
+  <section class="screen" id="s-rec"><div id="rec-body"></div></section>
+  <section class="screen" id="s-map"><div id="map-body"></div></section>
+  <section class="screen" id="s-shops"><div id="shops-body"></div></section>
+  <section class="screen" id="s-chart"><div id="chart-body"></div></section>
+  <section class="screen" id="s-price"><div id="price-body"></div></section>
+</div>
+
+<script src="js/tables.js?v=af7aa278"></script>
+<script src="js/basemap.js?v=b3eaee6f"></script>
+<script src="js/data.js?v=a17d8ddc"></script>
+<script src="js/model.js?v=dd038dc8"></script>
+<script src="js/utils.js?v=f94647f0"></script>
+<script src="js/screens/collection.js?v=012e21e0"></script>
+<script src="js/theme.js?v=646444ce"></script>
+<script src="js/flavour.js?v=ce9807e7"></script>
+<script src="js/nav.js?v=2e8f124f"></script>
+<script src="js/screens/welcome.js?v=ef661f75"></script>
+<script src="js/screens/welcome-scene.js?v=ee12eb80"></script>
+<script src="js/screens/welcome-shelf.js?v=06f57061"></script>
+<script src="js/shared/bottle-detail.js?v=ad5e196a"></script>
+<script src="js/screens/map.js?v=6a05987e"></script>
+<script src="js/screens/shops.js?v=ff94228a"></script>
+<script src="js/screens/charts.js?v=097e6922"></script>
+<script src="js/screens/spending.js?v=c7d543f0"></script>
+<script src="js/screens/recommend.js?v=f5432ebe"></script>
+<script src="js/boot.js?v=ce627e4c"></script>
+</body>
+</html>
