@@ -1,0 +1,4 @@
+# Byte for byte, same as the workspace repo. index.html is a generated artefact whose
+# DATA block is one object per line, and deploy.py compares its checksum against the
+# build output; a CRLF rewrite on checkout would break that comparison for no gain.
+* -text
