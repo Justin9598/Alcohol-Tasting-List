@@ -30,17 +30,41 @@ button:active,select:active{transform:translateY(1px)}
 .wrap{max-width:1040px;margin:0 auto;padding:0 16px 64px}
 
 /* ---------------------------------------------------------------- masthead */
-.mast{display:flex;align-items:flex-start;gap:16px;padding:28px 0 14px;border-bottom:1px solid var(--line)}
-.mast-l{flex:1;min-width:0}
-h1{
-  font-family:var(--serif);font-weight:600;letter-spacing:.01em;margin:0 0 2px;
-  font-size:clamp(22px,4.4vw,30px);line-height:1.15;
+/* A thin bar now: the menu on the left, the wordmark, the theme button. The title
+   itself moved into the hero, and the Bottles/Producers/Total value row went with
+   buildStats. No money anywhere on the welcome screen. */
+.mast{display:flex;align-items:center;gap:12px;padding:14px 0 10px;min-height:40px}
+.menu-wrap{position:relative;flex:none}
+.mast-mark{
+  flex:1;min-width:0;font-family:var(--serif);font-size:var(--fs-lg);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  opacity:1;transition:opacity .2s ease;
 }
-.tagline{color:var(--ink-soft);font-size:var(--fs-sm);margin:0}
-.stats{display:flex;gap:22px;flex-wrap:wrap;margin:14px 0 0}
-.stat-k{font-size:var(--fs-2xs);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
-.stat-v{font-family:var(--serif);font-size:19px;line-height:1.2}
-.stat-sub{font-size:var(--fs-2xs);color:var(--ink-soft)}
+/* On the welcome screen the hero carries the title at full size, so the wordmark in
+   the bar would be a second copy of it. It fades in on every other screen, where
+   there is no other title at all. */
+.wrap.at-welcome .mast-mark{opacity:0;pointer-events:none}
+
+/* "Visible only when hovering" as asked, with one departure that is not negotiable:
+   a touch screen has no hover, so under (hover:none) it is always at full strength.
+   Hover-only controls simply do not exist on a phone, and this one holds every tab.
+   It is also always visible once focused, or it would be invisible to the keyboard. */
+.burger{
+  display:flex;flex-direction:column;justify-content:center;gap:4px;
+  width:38px;height:34px;padding:0 8px;cursor:pointer;
+  background:transparent;border:1px solid transparent;border-radius:var(--r-pill);
+  opacity:.28;transition:opacity .18s ease,border-color .18s ease,background .18s ease;
+}
+.burger span{display:block;height:1.5px;background:var(--ink);border-radius:var(--r-xs);
+  transition:transform .22s ease,opacity .18s ease}
+.mast:hover .burger,.burger:hover,.burger:focus-visible,
+.burger[aria-expanded="true"]{opacity:1}
+.burger:hover,.burger[aria-expanded="true"]{background:var(--card);border-color:var(--line)}
+.burger[aria-expanded="true"] span:nth-child(1){transform:translateY(5.5px) rotate(45deg)}
+.burger[aria-expanded="true"] span:nth-child(2){opacity:0}
+.burger[aria-expanded="true"] span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg)}
+@media (hover:none){.burger{opacity:1}}
+
 .theme-btn{
   background:var(--card);border:1px solid var(--line);border-radius:var(--r-pill);
   padding:7px 13px;font-size:var(--fs-sm);cursor:pointer;white-space:nowrap;
@@ -152,20 +176,92 @@ select{
 .empty .glyph{font-family:var(--serif);font-size:26px;display:block;opacity:.45;margin-bottom:7px}
 
 /* ------------------------------------------------------------ stage 4: nav */
-.nav{display:flex;gap:5px;flex-wrap:wrap;padding:13px 0 0;border-bottom:1px solid var(--line)}
+/* The tabs drop out of the menu button. Closed, the panel carries the `hidden`
+   attribute rather than opacity:0, so the tabs leave the tab order properly instead
+   of sitting there as invisible targets. */
+.nav{
+  position:absolute;top:calc(100% + 6px);left:0;z-index:40;min-width:186px;
+  display:flex;flex-direction:column;gap:2px;padding:6px;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+  box-shadow:var(--shadow);
+}
+.nav[hidden]{display:none}
 .nav button{
-  background:transparent;border:1px solid transparent;border-bottom:none;
-  border-radius:var(--r-md) var(--r-md) 0 0;padding:7px 13px;font-size:var(--fs-sm);
-  cursor:pointer;color:var(--ink-soft);margin-bottom:-1px;
+  background:transparent;border:1px solid transparent;border-radius:var(--r-sm);
+  padding:8px 12px;font-size:var(--fs-sm);cursor:pointer;color:var(--ink-soft);
+  text-align:left;white-space:nowrap;
 }
-.nav button:hover{color:var(--ink)}
-.nav button[aria-current="page"]{
-  background:var(--card);border-color:var(--line);color:var(--ink);font-weight:500;
-}
+.nav button:hover{color:var(--ink);background:var(--paper-2)}
+.nav button[aria-current="page"]{color:var(--ink);font-weight:500;background:var(--paper-2)}
 .screen{display:none}
 .screen.on{display:block}
 .lede{color:var(--ink-soft);font-size:var(--fs-md);max-width:66ch;margin:16px 0 4px}
 h2.sec{font-family:var(--serif);font-size:19px;margin:26px 0 9px;font-weight:600}
+
+/* --------------------------------------------------------- stage 4: hero */
+/* The scene is the background and the title sits on it, which is what makes the
+   screen feel like a place rather than a dashboard. Everything below it stays on
+   ordinary paper, because a moving backdrop under a data table is unreadable. */
+.hero{
+  position:relative;margin:4px 0 26px;border-radius:var(--r-md);overflow:hidden;
+  border:1px solid var(--line);background:var(--paper-2);
+  min-height:clamp(250px,36vw,370px);display:flex;align-items:center;
+}
+.hero-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* A scrim under the text, and it is not decoration. The hero text is white so it can
+   sit on the figure and the hills, but the LIGHT theme's sky is pale: white on it
+   measured as unreadable, which is the same failure v1 shipped with its chip colours.
+   The scrim makes the contrast a property of the overlay rather than of whatever the
+   scene happens to be drawing underneath, so it cannot regress when the palette moves. */
+.hero::before{
+  content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(100deg,rgba(12,9,7,.74) 0%,rgba(12,9,7,.52) 34%,
+                             rgba(12,9,7,0) 64%);
+}
+.hero-in{position:relative;z-index:2;padding:clamp(20px,4vw,38px);max-width:min(52%,540px)}
+.hero-title{white-space:nowrap}
+.hero-title{
+  font-family:var(--serif);font-weight:600;letter-spacing:.01em;margin:0 0 6px;
+  font-size:clamp(30px,6.4vw,50px);line-height:1.04;color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.38),0 10px 28px rgba(0,0,0,.30);
+}
+.hero-sub{
+  margin:0 0 16px;font-size:var(--fs-md);line-height:1.45;color:rgba(255,255,255,.90);
+  max-width:27ch;
+  text-shadow:0 1px 3px rgba(0,0,0,.45);
+}
+.hero-pick{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.hero-lab{
+  font-size:var(--fs-2xs);letter-spacing:.09em;text-transform:uppercase;
+  color:rgba(255,255,255,.84);text-shadow:0 1px 3px rgba(0,0,0,.45);
+}
+/* Deliberately a native select. It is the hero control, so it is also the one that
+   most has to work: native gives keyboard, screen reader and a real mobile picker
+   for nothing, and a hand-rolled listbox would give none of that without a lot of code. */
+.hero-sel{
+  font:inherit;font-size:var(--fs-sm);color:var(--ink);cursor:pointer;
+  padding:9px 32px 9px 13px;border-radius:var(--r-pill);
+  background:var(--card);border:1px solid var(--line);
+  -webkit-appearance:none;appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),
+                   linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-position:calc(100% - 17px) 53%,calc(100% - 12px) 53%;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;
+  box-shadow:0 2px 10px rgba(0,0,0,.18);
+}
+.hero-sel:hover{border-color:var(--indigo-soft)}
+.hero-cap{
+  position:absolute;right:14px;bottom:11px;z-index:2;margin:0;
+  font-size:var(--fs-2xs);letter-spacing:.09em;text-transform:uppercase;
+  color:rgba(255,255,255,.72);text-shadow:0 1px 3px rgba(0,0,0,.5);
+}
+@media (max-width:620px){
+  .hero::before{background:linear-gradient(to top,rgba(12,9,7,.80) 0%,
+                                           rgba(12,9,7,.55) 42%,rgba(12,9,7,0) 78%)}
+  .hero{min-height:280px;align-items:flex-end}
+  .hero-in{max-width:none;padding-bottom:30px}
+  .hero-cap{right:auto;left:clamp(20px,4vw,38px);bottom:9px}
+}
 
 /* ------------------------------------------------------- stage 4: welcome */
 .panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:13px;padding:18px 0 0}

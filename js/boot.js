@@ -12,9 +12,9 @@ document.querySelector("#reset").addEventListener("click", () => {
   buildControls(); render();
 });
 document.querySelector("#theme-btn").addEventListener("click", toggleTheme);
+document.querySelector("#burger").addEventListener("click", menuToggle);
 
 applyTheme();
-buildStats();
 buildControls();
 render();
 setScreenMode("welcome");

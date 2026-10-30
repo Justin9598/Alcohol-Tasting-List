@@ -3,6 +3,13 @@ const WP_MS = 120000;                 // two minutes
 let wpTimers = [];
 function wpClearTimers(){ wpTimers.forEach(clearInterval); wpTimers = []; }
 
+/* The welcome screen is scoped by the dropdown under the title. "All" is every bottle,
+   which is what it was before. Everything on this screen reads welcomeRows() rather
+   than DATA so one selection moves the tiles, the panels and the charts together.
+   Nothing else in the app is affected: the Collection screen keeps its own pills. */
+let wCat = "All";
+const welcomeRows = () => wCat === "All" ? DATA : DATA.filter(d => d.cat === wCat);
+
 function seasonNow(){
   const m = new Date().getMonth();
   return m <= 1 || m === 11 ? "winter" : m <= 4 ? "spring" : m <= 7 ? "summer" : "autumn";
@@ -47,7 +54,8 @@ const photoFirst = rows => rows.slice().sort((a,b) => (b.img ? 1 : 0) - (a.img ?
 
 function wpPanels(){
   const season = seasonNow();
-  const seasonal = DATA.filter(d => d.cat === "Sake" || d.cat === "Craft Sake")
+  const R = welcomeRows();
+  const seasonal = R.filter(d => d.cat === "Sake" || d.cat === "Craft Sake")
     .map(d => [d, seasonScore(d, season)]).filter(x => x[1] > 0)
     .sort((a,b) => b[1] - a[1]).slice(0, 12).map(x => x[0]);
   const panels = [];
@@ -62,7 +70,7 @@ function wpPanels(){
      many rows carry a date. Values are ISO strings and are compared as strings, which
      sorts correctly whether a row carries a date or a date and a time: the two batches of
      2026-10-14 are only separable because the later one records the time as well. */
-  const dated = DATA.filter(d => d.added);
+  const dated = R.filter(d => d.added);
   if(dated.length){
     const byAdded = dated.slice().sort((a, b) =>
       a.added < b.added ? -1 : a.added > b.added ? 1
@@ -74,7 +82,7 @@ function wpPanels(){
        out because the panel beside this one is entirely favourites, and two adjacent
        panels opening on the same bottle reads as a bug even when it is not. */
     const buckets = {};
-    photoFirst(DATA.filter(d => !d.fav)).forEach(d => {
+    photoFirst(R.filter(d => !d.fav)).forEach(d => {
       (buckets[d.cat] = buckets[d.cat] || []).push(d);
     });
     const order = Object.keys(buckets).sort((a,b) => catOrder(a) - catOrder(b));
@@ -86,9 +94,13 @@ function wpPanels(){
     }
     panels.push(["A bit of everything", mix]);
   }
-  panels.push(["Favourites", photoFirst(DATA.filter(d => d.fav)).slice(0, 12)]);
+  panels.push(["Favourites", photoFirst(R.filter(d => d.fav)).slice(0, 12)]);
   panels.push(["Good for " + season, seasonal]);
-  return panels;
+  /* Drop panels with nothing in them. Across the whole cellar none of these is ever
+     empty, but a narrow category easily has no favourite and no seasonal pick, and
+     three panels of which two read "nothing here yet" is worse than one that does not.
+     It also keeps the no-empty-state rule the rest of the app follows. */
+  return panels.filter(p => p[1].length);
 }
 
 /* One bar chart helper, shared by the welcome screen and the charts screen, so the
@@ -108,53 +120,85 @@ function barChart(title, counts, colFn, note){
     "</div>" + (note ? '<p class="count">' + note + "</p>" : "") + "</div>";
 }
 
-function gradeCounts(){
+/* Both take an optional row set. The Charts screen calls them with nothing and still
+   gets the whole cellar; the welcome screen passes its current scope. Adding the
+   argument rather than reading a global keeps the two screens independent. */
+function gradeCounts(rows){
   const m = {};
   GRADE_ORDER.forEach(g => { m[g] = 0; });
-  DATA.forEach(d => { const g = gradeOf(d); if(g) m[g] = (m[g] || 0) + 1; });
+  (rows || DATA).forEach(d => { const g = gradeOf(d); if(g) m[g] = (m[g] || 0) + 1; });
   return m;
 }
-function categoryCounts(){
+function categoryCounts(rows){
   const m = {};
   Object.keys(CATEGORIES).sort((a, b) => catOrder(a) - catOrder(b)).forEach(c => { m[c] = 0; });
-  DATA.forEach(d => { m[d.cat] = (m[d.cat] || 0) + 1; });
+  (rows || DATA).forEach(d => { m[d.cat] = (m[d.cat] || 0) + 1; });
   return m;
 }
 
+/* No money on this screen. The Spend tile is gone and so is the masthead total; the
+   Spending tab is where every figure lives now, which is also where someone looking
+   for one would go. */
 function buildWelcomeSummary(){
-  const pours = DATA.filter(isPour).length;
-  const bottles = DATA.length - pours;
-  const prices = [];
-  DATA.forEach(d => d.purchases.forEach(p => { if(p.price != null) prices.push(p.price); }));
-  const spend = prices.reduce((a, b) => a + Math.round(b * 100), 0) / 100;
-  const countries = new Set(DATA.map(d => d.country).filter(Boolean)).size;
-  const nPur = DATA.reduce((a, d) => a + d.purchases.length, 0);
-  // Six, so they sit on one row at a normal window width. Anything else is a click away.
+  const R = welcomeRows();
+  const pours = R.filter(isPour).length;
+  const bottles = R.length - pours;
+  const countries = new Set(R.map(d => d.country).filter(Boolean)).size;
+  const nPur = R.reduce((a, d) => a + d.purchases.length, 0);
+  const styles = new Set();
+  R.forEach(d => (d.styles || []).forEach(x => styles.add(x)));
   const cell = (k, v, s) => "<div><div class=\"k\">" + k + '</div><div class="v">' + v +
     "</div>" + (s ? '<div class="s">' + s + "</div>" : "") + "</div>";
   document.querySelector("#welcome-summary").innerHTML =
     '<div class="sum">' +
-      cell("Bottles", DATA.length, nPur + " purchases") +
+      cell("Bottles", R.length, nPur + (nPur === 1 ? " purchase" : " purchases")) +
       cell("Tasted", pours, "pours and carafes") +
       cell("Kept", bottles, "full bottles") +
-      cell("Producers", new Set(DATA.map(d => d.producer).filter(Boolean)).size,
-           countries + " countries") +
-      cell("Spend", money(spend), prices.length + " of " + nPur + " priced") +
-      cell("Favourites", DATA.filter(d => d.fav).length, "starred in the workbook") +
+      cell("Producers", new Set(R.map(d => d.producer).filter(Boolean)).size,
+           countries + (countries === 1 ? " country" : " countries")) +
+      cell("Styles", styles.size, "across the selection") +
+      cell("Favourites", R.filter(d => d.fav).length, "starred in the workbook") +
     "</div>";
 }
 
 function buildWelcomeCharts(){
-  document.querySelector("#welcome-charts").innerHTML =
-    barChart("Grades I have tried", gradeCounts(), gradeCol,
-      DATA.filter(d => !gradeOf(d)).length + " bottles carry no grade, which is correct for " +
-      "every category outside sake, most craft sake, and any bottle whose brewery " +
-      "declines to designate one.") +
-    barChart("By category", categoryCounts(), catCol);
+  const R = welcomeRows();
+  const ungraded = R.filter(d => !gradeOf(d)).length;
+  const grades = gradeCounts(R);
+  const anyGrade = Object.keys(grades).some(g => grades[g] > 0);
+  let html = "";
+  if(anyGrade){
+    html += barChart("Grades I have tried", grades, gradeCol,
+      ungraded + (ungraded === 1 ? " bottle carries" : " bottles carry") + " no grade, " +
+      "which is correct for every category outside sake, most craft sake, and any " +
+      "bottle whose brewery declines to designate one.");
+  }
+  /* With one category selected this chart is a single bar, which says nothing the
+     dropdown has not already said. It only earns its place across the whole cellar. */
+  if(wCat === "All") html += barChart("By category", categoryCounts(R), catCol);
+  document.querySelector("#welcome-charts").innerHTML = html;
+}
+
+/* The dropdown lists only categories that actually have bottles, with their counts,
+   for the same reason the grade pills do: an option that returns nothing is a dead end
+   the reader has to discover by clicking it. */
+function buildWelcomePicker(){
+  const sel = document.querySelector("#wcat");
+  if(!sel) return;
+  const counts = categoryCounts();
+  const live = Object.keys(counts).filter(c => counts[c] > 0)
+    .sort((a, b) => catOrder(a) - catOrder(b));
+  if(live.indexOf(wCat) < 0 && wCat !== "All") wCat = "All";
+  sel.innerHTML = '<option value="All">Everything (' + DATA.length + ")</option>" +
+    live.map(c => '<option value="' + esc(c) + '">' + esc(c) + " (" + counts[c] + ")</option>").join("");
+  sel.value = wCat;
+  sel.onchange = () => { wCat = sel.value; buildWelcome(); };
 }
 
 function buildWelcome(){
   wpClearTimers();
+  buildWelcomePicker();
+  buildScene();
   buildWelcomeSummary();
   buildWelcomeCharts();
   const host = document.querySelector("#welcome-panels");

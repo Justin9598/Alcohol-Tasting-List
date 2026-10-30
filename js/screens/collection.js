@@ -215,20 +215,6 @@ function buildPager(total){
   }));
 }
 
-function buildStats(){
-  const prices = [];
-  DATA.forEach(d => d.purchases.forEach(p => { if(p.price != null) prices.push(p.price); }));
-  /* Summed in integer cents. Adding 150 floats and rounding at the end reported the
-     total a cent under the workbook, because the error accumulates before the rounding. */
-  const total = prices.reduce((a,b) => a + Math.round(b * 100), 0) / 100;
-  const nPur = DATA.reduce((a,d) => a + d.purchases.length, 0);
-  const producers = new Set(DATA.map(d => d.producer).filter(Boolean)).size;
-  document.querySelector("#stats").innerHTML =
-    '<div><div class="stat-k">Bottles</div><div class="stat-v">' + DATA.length + "</div></div>" +
-    '<div><div class="stat-k">Producers</div><div class="stat-v">' + producers + "</div></div>" +
-    '<div><div class="stat-k">Total value</div><div class="stat-v">' + money(total) + "</div>" +
-    '<div class="stat-sub">across ' + prices.length + " of " + nPur + " purchases</div></div>";
-}
 
 /* render() is the single owner of the reset button state. Do not sprinkle
    syncResetBtn() into individual control handlers. */
