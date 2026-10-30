@@ -1,0 +1,358 @@
+:root{
+  /* Type scale, carried over from v1. Six steps across the UI range; display sizes
+     stay bespoke and deliberately sit outside the scale. */
+  --fs-2xs:9.5px; --fs-xs:10.5px; --fs-sm:11.5px; --fs-md:12.5px; --fs-lg:13.5px; --fs-xl:15px;
+  /* Shape scale. One documented rule: bars and dots 2, inline chips and thumbnails 4,
+     cards and containers 8, anything you click is a pill. A container must never carry a
+     smaller radius than a panel nested inside it. */
+  --r-xs:2px; --r-sm:4px; --r-md:8px; --r-pill:999px;
+  --paper:#f4f0e6;--paper-2:#efe9db;--card:#fbf9f3;
+  --ink:#1f1c17;--ink-soft:#5e574c;--line:#ddd4c0;
+  --indigo:#26375c;--indigo-soft:#54648a;
+  --amber:#c0822a;--amber-deep:#9c6516;--celadon:#6f7d5f;--rose:#a85b62;--plum:#8d4f72;
+  --shadow:0 1px 0 rgba(31,28,23,.04), 0 8px 24px -16px rgba(31,28,23,.35);
+  --serif:"Shippori Mincho","Yu Mincho","Songti SC",Georgia,serif;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:var(--fs-md);line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font:inherit;color:inherit}
+/* Transform only, so it stays on the compositor and still fires under
+   prefers-reduced-motion: it is a state change, not an animation. */
+button:active,select:active{transform:translateY(1px)}
+:focus-visible{outline:2px solid var(--indigo-soft);outline-offset:2px;border-radius:var(--r-sm)}
+
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px 64px}
+
+/* ---------------------------------------------------------------- masthead */
+.mast{display:flex;align-items:flex-start;gap:16px;padding:28px 0 14px;border-bottom:1px solid var(--line)}
+.mast-l{flex:1;min-width:0}
+h1{
+  font-family:var(--serif);font-weight:600;letter-spacing:.01em;margin:0 0 2px;
+  font-size:clamp(22px,4.4vw,30px);line-height:1.15;
+}
+.tagline{color:var(--ink-soft);font-size:var(--fs-sm);margin:0}
+.stats{display:flex;gap:22px;flex-wrap:wrap;margin:14px 0 0}
+.stat-k{font-size:var(--fs-2xs);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
+.stat-v{font-family:var(--serif);font-size:19px;line-height:1.2}
+.stat-sub{font-size:var(--fs-2xs);color:var(--ink-soft)}
+.theme-btn{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:7px 13px;font-size:var(--fs-sm);cursor:pointer;white-space:nowrap;
+}
+.theme-btn:hover{border-color:var(--indigo-soft)}
+
+/* ---------------------------------------------------------------- controls */
+.controls{display:flex;flex-direction:column;gap:11px;padding:16px 0 6px}
+.ctl-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ctl-lab{font-size:var(--fs-2xs);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);margin-right:2px}
+.search{
+  flex:1;min-width:210px;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r-pill);padding:9px 15px;font-size:var(--fs-md);
+}
+.search::placeholder{color:var(--ink-soft)}
+select{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:8px 12px;font-size:var(--fs-sm);cursor:pointer;
+}
+.pill{
+  background:transparent;border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:5px 12px;font-size:var(--fs-sm);cursor:pointer;color:var(--ink-soft);
+}
+.pill:hover{border-color:var(--indigo-soft);color:var(--ink)}
+.pill[aria-pressed="true"]{background:var(--indigo);border-color:var(--indigo);color:#fff;font-weight:500}
+.reset{
+  background:transparent;border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:5px 12px;font-size:var(--fs-sm);cursor:pointer;color:var(--ink-soft);
+}
+.reset[disabled]{opacity:.38;cursor:default}
+.count{font-size:var(--fs-sm);color:var(--ink-soft);padding:4px 0 12px}
+
+/* -------------------------------------------------------------------- list */
+.list{display:flex;flex-direction:column;gap:7px}
+.row{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--shadow)}
+.row-head{display:flex;align-items:center;gap:9px;padding:11px 13px}
+/* A fixed slot so every name starts at the same x whether or not it is a favourite.
+   This is a span and not a button: favourites are display only, set in the workbook. */
+.fav-mark{flex:0 0 15px;width:15px;text-align:center;color:var(--amber-deep);font-size:var(--fs-lg)}
+.fav-mark.off{visibility:hidden}
+.row-main{flex:1;min-width:0}
+.row-name{font-family:var(--serif);font-size:var(--fs-xl);line-height:1.25;word-break:break-word}
+.row-meta{font-size:var(--fs-sm);color:var(--ink-soft);margin-top:2px}
+.row-right{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.price{font-family:var(--serif);font-size:var(--fs-lg);white-space:nowrap}
+.price.none{color:var(--ink-soft);font-style:italic;font-family:var(--sans);font-size:var(--fs-sm)}
+.chev{
+  background:transparent;border:1px solid var(--line);border-radius:var(--r-pill);
+  width:30px;height:30px;cursor:pointer;color:var(--ink-soft);position:relative;flex-shrink:0;
+}
+.chev:hover{border-color:var(--indigo-soft);color:var(--ink)}
+.chev svg{transition:transform .16s ease}
+.row.open .chev svg{transform:rotate(180deg)}
+.noted::after{
+  content:"";position:absolute;top:3px;right:3px;width:5px;height:5px;
+  border-radius:var(--r-pill);background:var(--amber);
+}
+.chip{
+  display:inline-block;border-radius:var(--r-sm);padding:1px 7px;
+  font-size:var(--fs-2xs);letter-spacing:.03em;white-space:nowrap;
+}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+
+/* ------------------------------------------------------------------ detail */
+.detail{display:none;padding:0 13px 14px;border-top:1px solid var(--line);margin-top:2px}
+.row.open .detail{display:block}
+/* Photograph on the left, the data beside it. The bottle and its numbers read together
+   instead of the reader scrolling past a tall picture to reach the fields. */
+.bd-split{display:flex;gap:17px;align-items:flex-start;padding:13px 0 0}
+.bd-split > .bd-photo{flex:0 0 212px;margin:0;align-self:stretch;max-height:300px}
+.bd-split > .nophoto{flex:0 0 212px;margin:0;align-self:flex-start}
+.bd-main{flex:1;min-width:0}
+.bd-main .bd-grid{padding-top:0}
+/* The zoomed state has to escape the column or there is nothing to zoom into. */
+.bd-split > .bd-photo.zoomed{flex:1 1 100%;max-height:none}
+@media (max-width:620px){
+  .bd-split{flex-direction:column}
+  .bd-split > .bd-photo,.bd-split > .nophoto{flex:1 1 auto;width:100%}
+}
+.bd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:10px 18px;padding:13px 0 0}
+.bd-k{font-size:var(--fs-2xs);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
+.bd-v{font-size:var(--fs-md);word-break:break-word}
+.bd-sec{font-family:var(--serif);font-size:var(--fs-lg);margin:17px 0 7px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.bd-photo{
+  margin:13px 0 0;background:var(--paper-2);border-radius:var(--r-md);
+  padding:9px;display:flex;justify-content:center;
+}
+.bd-photo img{
+  max-width:260px;max-height:300px;width:auto;height:auto;object-fit:contain;
+  border-radius:var(--r-sm);cursor:zoom-in;display:block;
+}
+.bd-photo.zoomed img{max-width:100%;max-height:none;cursor:zoom-out}
+.nophoto{
+  background:var(--paper-2);border-radius:var(--r-md);padding:22px;text-align:center;
+  color:var(--ink-soft);margin:13px 0 0;
+}
+.nophoto .glyph{font-family:var(--serif);font-size:26px;display:block;opacity:.5}
+.nophoto .cap{font-size:var(--fs-2xs);letter-spacing:.09em;text-transform:uppercase;margin-top:5px}
+.pur{width:100%;border-collapse:collapse;font-size:var(--fs-sm)}
+.pur th{
+  text-align:left;font-size:var(--fs-2xs);letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-soft);font-weight:400;padding:0 10px 4px 0;
+}
+.pur td{padding:4px 10px 4px 0;border-top:1px solid var(--line)}
+.imported-note{font-size:var(--fs-md);line-height:1.6;white-space:pre-wrap}
+.sat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:9px 18px}
+.rating{color:var(--amber-deep);letter-spacing:.06em;white-space:nowrap}
+.empty{text-align:center;padding:52px 16px;color:var(--ink-soft)}
+.empty .glyph{font-family:var(--serif);font-size:26px;display:block;opacity:.45;margin-bottom:7px}
+
+/* ------------------------------------------------------------ stage 4: nav */
+.nav{display:flex;gap:5px;flex-wrap:wrap;padding:13px 0 0;border-bottom:1px solid var(--line)}
+.nav button{
+  background:transparent;border:1px solid transparent;border-bottom:none;
+  border-radius:var(--r-md) var(--r-md) 0 0;padding:7px 13px;font-size:var(--fs-sm);
+  cursor:pointer;color:var(--ink-soft);margin-bottom:-1px;
+}
+.nav button:hover{color:var(--ink)}
+.nav button[aria-current="page"]{
+  background:var(--card);border-color:var(--line);color:var(--ink);font-weight:500;
+}
+.screen{display:none}
+.screen.on{display:block}
+.lede{color:var(--ink-soft);font-size:var(--fs-md);max-width:66ch;margin:16px 0 4px}
+h2.sec{font-family:var(--serif);font-size:19px;margin:26px 0 9px;font-weight:600}
+
+/* ------------------------------------------------------- stage 4: welcome */
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:13px;padding:18px 0 0}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:13px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.panel h3{font-family:var(--serif);font-size:var(--fs-xl);margin:0 0 9px;font-weight:600}
+.wp-photo{position:relative;background:var(--paper-2);border-radius:var(--r-md);
+  height:210px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.wp-photo img{max-width:100%;max-height:100%;object-fit:contain}
+.wp-none{text-align:center;color:var(--ink-soft)}
+.wp-none .glyph{font-family:var(--serif);font-size:26px;display:block;opacity:.5}
+.wp-none .cap{font-size:var(--fs-2xs);letter-spacing:.09em;text-transform:uppercase;margin-top:5px}
+/* Real buttons, not click handlers on a div, so prev/next works from the keyboard
+   and announces itself. They sit at .5 opacity and brighten on hover or focus. */
+.wp-prev,.wp-next{position:absolute;top:0;bottom:0;width:48%;border:none;background:none;
+  cursor:pointer;opacity:.5;display:flex;align-items:center;padding:0 7px}
+.wp-prev{left:0;justify-content:flex-start}
+.wp-next{right:0;justify-content:flex-end}
+.wp-prev:hover,.wp-next:hover,.wp-prev:focus-visible,.wp-next:focus-visible{opacity:1}
+.wp-prev span,.wp-next span{background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r-pill);width:25px;height:25px;display:flex;align-items:center;
+  justify-content:center;font-size:var(--fs-sm)}
+/* Hover-only affordances do not exist on a phone, and these are the control the
+   whole panel is built around. */
+@media (hover:none){.wp-prev,.wp-next{opacity:.85}}
+.wp-name{font-family:var(--serif);font-size:var(--fs-lg);margin:9px 0 2px;line-height:1.3}
+.wp-meta{font-size:var(--fs-sm);color:var(--ink-soft)}
+.wp-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:9px}
+.wp-dots{display:flex;gap:4px}
+.wp-dot{width:5px;height:5px;border-radius:var(--r-pill);background:var(--line)}
+.wp-dot.on{background:var(--indigo-soft)}
+.wp-n{font-size:var(--fs-2xs);color:var(--ink-soft)}
+
+/* ----------------------------------------------- stage 4: map and shops */
+#map,#shopmap{height:460px;border-radius:var(--r-md);border:1px solid var(--line);
+  margin-top:16px;background:var(--sea)}
+/* Tiles carry their own daylight palette, so dark mode has to shift the tile pane and
+   nothing else. The filter is a THEME TOKEN rather than the old data-mapdark attribute,
+   so it resolves through applySeason like every other colour and there is no second
+   switch to keep in step. The embedded basemap underneath is untouched by it: that pane
+   sits outside .leaflet-tile-pane and already reads the seasonal variables directly. */
+.leaflet-tile-pane{filter:var(--tile-filter,none)}
+.map-lab{font-family:var(--sans);font-size:var(--fs-2xs);font-weight:500;
+  color:var(--ink-soft);white-space:nowrap;pointer-events:none;
+  text-shadow:0 0 3px var(--paper-2),0 0 2px var(--paper-2),0 0 1px var(--paper-2)}
+/* Leaflet gives every div icon a white box and a border by default, which would put a
+   card behind each city name. */
+.leaflet-div-icon.map-lab{background:none;border:0}
+.leaflet-popup-content{font-family:var(--sans);font-size:var(--fs-sm);margin:11px 13px}
+.pop-h{font-family:var(--serif);font-size:var(--fs-lg);margin-bottom:3px}
+.pop-b{color:var(--ink-soft);font-size:var(--fs-xs);margin-bottom:6px}
+.pop-list{margin:0;padding-left:16px}
+/* A Leaflet popup is narrow, so the split needs a smaller photo column than the list row */
+.pop-split{gap:11px;padding-top:0}
+.pop-split > .bd-photo{flex:0 0 96px;max-height:132px;padding:5px}
+.pop-split .bd-grid{grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:6px 11px}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(262px,1fr));gap:12px;margin-top:12px}
+.shop{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:13px;box-shadow:var(--shadow)}
+.shop h4{font-family:var(--serif);font-size:var(--fs-lg);margin:0 0 3px;font-weight:600}
+.shop .kind{font-size:var(--fs-2xs);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
+.shop p{margin:7px 0 0;font-size:var(--fs-sm);color:var(--ink-soft);line-height:1.55}
+.shop .nums{margin-top:9px;font-size:var(--fs-sm)}
+
+/* -------------------------------------------------- stage 4: price screen */
+.pv{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+  margin-top:10px;box-shadow:var(--shadow);overflow:hidden}
+.pv-head{width:100%;background:none;border:none;text-align:left;padding:13px;cursor:pointer;display:block}
+.pv-head:hover{background:var(--paper-2)}
+.pv-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.pv-name{font-family:var(--serif);font-size:var(--fs-xl)}
+.pv-spend{font-family:var(--serif);font-size:var(--fs-lg);white-space:nowrap}
+.pv-sub{font-size:var(--fs-sm);color:var(--ink-soft);margin-top:2px}
+.pv-bar{height:5px;background:var(--paper-2);border-radius:var(--r-xs);margin-top:9px;overflow:hidden}
+.pv-bar i{display:block;height:100%;border-radius:var(--r-xs)}
+.pv-cols{display:none;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:13px;padding:0 13px 13px;border-top:1px solid var(--line)}
+.pv.open .pv-cols{display:grid}
+.pv-col h5{font-size:var(--fs-2xs);letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-soft);margin:11px 0 5px;font-weight:400}
+.pv-col ul{margin:0;padding-left:15px;font-size:var(--fs-sm);line-height:1.65}
+.catbar{display:flex;height:24px;border-radius:var(--r-xs);overflow:hidden;margin:10px 0 7px}
+.catbar i{display:block;height:100%}
+.catkey{display:flex;gap:13px;flex-wrap:wrap;font-size:var(--fs-sm)}
+.catkey span{display:flex;align-items:center;gap:5px}
+.catkey i{width:9px;height:9px;border-radius:var(--r-xs);display:block}
+
+/* -------------------------------------------------------- stage 4: charts */
+.chart-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:15px;margin-top:13px;box-shadow:var(--shadow)}
+.scatter{width:100%;height:auto;display:block}
+.scatter circle{cursor:pointer}
+.axis-lab{font-size:var(--fs-2xs);fill:var(--ink-soft);letter-spacing:.07em;text-transform:uppercase}
+.grid-l{stroke:var(--line);stroke-width:1}
+.bars{display:flex;flex-direction:column;gap:7px;margin-top:11px}
+.bar-row{display:grid;grid-template-columns:150px 1fr 54px;gap:10px;align-items:center;font-size:var(--fs-sm)}
+/* Both of these MUST be display:block. They are spans, and an inline box ignores width
+   and height, so the fill rendered as nothing at all and every bar looked empty. */
+.bar-track{display:block;background:var(--paper-2);border-radius:var(--r-xs);height:15px;overflow:hidden}
+.bar-fill{display:block;height:100%;border-radius:var(--r-xs);min-width:2px}
+.bar-num{text-align:right;color:var(--ink-soft);font-size:var(--fs-sm)}
+/* the point a reader looks for first, so it is drawn heavier than the grid */
+.axis-mid{stroke:var(--ink-soft);stroke-width:2;opacity:.85}
+.axis-mid-lab{font-size:var(--fs-2xs);fill:var(--ink-soft);letter-spacing:.06em}
+.scatter circle:hover{stroke-width:2.6}
+.scatter circle.sel{stroke:var(--ink);stroke-width:3}
+.pt-card{margin-top:11px;background:var(--paper-2);border:1px solid var(--line);
+  border-radius:var(--r-md);padding:11px 13px;display:none}
+.pt-card.on{display:block}
+.pt-name{font-family:var(--serif);font-size:var(--fs-lg)}
+.pt-meta{font-size:var(--fs-sm);color:var(--ink-soft);margin-top:3px}
+.pt-hint{font-size:var(--fs-sm);color:var(--ink-soft);font-style:italic}
+
+/* -------------------------------------------------------- pagination */
+.pager{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;
+  padding:18px 0 4px}
+.pager button{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-pill);
+  min-width:32px;padding:5px 10px;font-size:var(--fs-sm);cursor:pointer;color:var(--ink-soft);
+}
+.pager button:hover:not([disabled]){border-color:var(--indigo-soft);color:var(--ink)}
+.pager button[aria-current="true"]{background:var(--indigo);border-color:var(--indigo);
+  color:#fff;font-weight:500}
+.pager button[disabled]{opacity:.35;cursor:default}
+.pager .gap{color:var(--ink-soft);padding:0 2px}
+
+/* ------------------------------------------------- welcome summary strip */
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:11px;
+  margin:18px 0 0}
+.sum div{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:11px 13px;box-shadow:var(--shadow)}
+.sum .k{font-size:var(--fs-2xs);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
+.sum .v{font-family:var(--serif);font-size:21px;line-height:1.2;margin-top:2px}
+.sum .s{font-size:var(--fs-2xs);color:var(--ink-soft)}
+
+/* ------------------------------------------------- recommendation cards */
+.recs{display:grid;grid-template-columns:repeat(auto-fit,minmax(296px,1fr));gap:13px;margin-top:13px}
+.rec{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:13px;box-shadow:var(--shadow)}
+.rec-why{font-size:var(--fs-2xs);letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-soft);margin-bottom:9px}
+/* photograph left, everything else right, same shape as the list row's detail panel */
+.rec-split{display:flex;gap:12px;align-items:flex-start}
+.rec-photo{flex:0 0 108px;background:var(--paper-2);border-radius:var(--r-md);height:146px;
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+.rec-photo img{max-width:100%;max-height:100%;object-fit:contain}
+.rec-body{flex:1;min-width:0;display:flex;flex-direction:column;min-height:146px}
+.rec-name{font-family:var(--serif);font-size:var(--fs-lg);line-height:1.3}
+.rec-meta{font-size:var(--fs-sm);color:var(--ink-soft);margin-top:3px}
+.rec-buy{margin-top:auto;padding-top:8px;font-size:var(--fs-sm)}
+.rec-buy b{font-weight:500}
+.rec-buy a{color:var(--indigo);text-decoration:underline}
+.rec-buy .none{color:var(--ink-soft);font-style:italic}
+.rec-lede{color:var(--ink-soft);font-size:var(--fs-sm);margin:3px 0 0;max-width:70ch}
+@media (max-width:420px){
+  .rec-split{flex-direction:column}
+  .rec-photo{flex:1 1 auto;width:100%}
+  .rec-body{min-height:0}
+}
+
+/* ---------------------------------------------------------- stage 4: quiz */
+.qz{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:17px;margin-top:16px;box-shadow:var(--shadow)}
+.qz-step{font-size:var(--fs-2xs);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
+.qz-dots{display:inline-flex;gap:4px;margin-left:7px;vertical-align:middle}
+.qz-q{font-family:var(--serif);font-size:21px;margin:9px 0 15px;line-height:1.3}
+.qz-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:8px}
+.qz-opt{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:11px 16px;text-align:left;cursor:pointer;font-size:var(--fs-md)}
+.qz-opt:hover{border-color:var(--indigo-soft);background:var(--card)}
+.qz-nav{display:flex;gap:8px;margin-top:15px}
+.qz-res{display:flex;flex-direction:column;gap:9px}
+.qz-card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--r-md);padding:13px}
+.qz-card.top{border-color:var(--indigo-soft)}
+.qz-name{font-family:var(--serif);font-size:var(--fs-xl)}
+.qz-badge{font-size:var(--fs-2xs);letter-spacing:.05em;color:var(--ink-soft)}
+.qz-badge.none{font-style:italic}
+.qz-prof{display:flex;gap:4px;flex-wrap:wrap;margin-top:7px}
+.qz-pchip{border-radius:var(--r-sm);padding:1px 7px;font-size:var(--fs-2xs);
+  background:var(--paper);color:var(--ink-soft);border:1px solid var(--line)}
+/* Token only. A baked rgba() here would be a light-theme navy sitting invisibly
+   on a dark card. */
+.qz-pchip.on{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+.qz-pchip.soft{opacity:.55}
+.qz-why{font-size:var(--fs-sm);color:var(--ink-soft);margin-top:7px}
+
+@media (max-width:620px){
+  .row-head{flex-wrap:wrap}
+  .row-right{width:100%;justify-content:space-between;padding-left:24px}
+  .bar-row{grid-template-columns:104px 1fr 44px}
+}
