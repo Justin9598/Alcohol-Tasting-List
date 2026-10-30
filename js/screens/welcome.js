@@ -3,12 +3,17 @@ const WP_MS = 120000;                 // two minutes
 let wpTimers = [];
 function wpClearTimers(){ wpTimers.forEach(clearInterval); wpTimers = []; }
 
-/* The welcome screen is scoped by the dropdown under the title. "All" is every bottle,
-   which is what it was before. Everything on this screen reads welcomeRows() rather
-   than DATA so one selection moves the tiles, the panels and the charts together.
-   Nothing else in the app is affected: the Collection screen keeps its own pills. */
-let wCat = "All";
-const welcomeRows = () => wCat === "All" ? DATA : DATA.filter(d => d.cat === wCat);
+/* The welcome screen is scoped by the shelf: a main category, and optionally one of
+   its subs. `wMain` null means nothing has been picked and the screen is the scene
+   alone, which is the opening state. Everything below reads welcomeRows() rather than
+   DATA, so one choice moves the tiles, the panels and the charts together. Nothing
+   else in the app is affected: the Collection screen keeps its own pills. */
+let wMain = null, wSub = "All";
+function welcomeRows(){
+  if(!wMain) return DATA;
+  const rows = DATA.filter(d => mainOf(d) === wMain);
+  return wSub === "All" ? rows : rows.filter(d => subOf(d) === wSub);
+}
 
 function seasonNow(){
   const m = new Date().getMonth();
@@ -173,34 +178,46 @@ function buildWelcomeCharts(){
       "which is correct for every category outside sake, most craft sake, and any " +
       "bottle whose brewery declines to designate one.");
   }
-  /* With one category selected this chart is a single bar, which says nothing the
-     dropdown has not already said. It only earns its place across the whole cellar. */
-  if(wCat === "All") html += barChart("By category", categoryCounts(R), catCol);
+  /* Across a main category this chart is one bar per constituent category, which the
+     subs row already says. It only earns its place when nothing narrower is chosen. */
+  if(!wMain) html += barChart("By category", categoryCounts(R), catCol);
   document.querySelector("#welcome-charts").innerHTML = html;
 }
 
-/* The dropdown lists only categories that actually have bottles, with their counts,
-   for the same reason the grade pills do: an option that returns nothing is a dead end
-   the reader has to discover by clicking it. */
-function buildWelcomePicker(){
-  const sel = document.querySelector("#wcat");
-  if(!sel) return;
-  const counts = categoryCounts();
-  const live = Object.keys(counts).filter(c => counts[c] > 0)
-    .sort((a, b) => catOrder(a) - catOrder(b));
-  if(live.indexOf(wCat) < 0 && wCat !== "All") wCat = "All";
-  sel.innerHTML = '<option value="All">Everything (' + DATA.length + ")</option>" +
-    live.map(c => '<option value="' + esc(c) + '">' + esc(c) + " (" + counts[c] + ")</option>").join("");
-  sel.value = wCat;
-  sel.onchange = () => { wCat = sel.value; buildWelcome(); };
+/* The information block is built only when a bottle has been taken off the shelf.
+   Until then the welcome screen is the scene and nothing else, which is what was
+   asked for and also what makes the shelf read as the way in. */
+function buildWelcomeInfo(){
+  wpClearTimers();
+  const info = document.querySelector("#welcome-info");
+  if(!info) return;
+  info.hidden = !wMain;
+  if(!wMain){
+    info.innerHTML = "";
+    return;
+  }
+  info.innerHTML = '<h2 class="sec" id="info-head"></h2>' +
+    '<div id="welcome-summary"></div>' +
+    '<div id="welcome-panels" class="panels"></div>' +
+    '<div id="welcome-charts"></div>';
+  const rows = welcomeRows();
+  document.querySelector("#info-head").textContent =
+    (wSub === "All" ? wMain : wSub) + ", " + rows.length +
+    (rows.length === 1 ? " bottle" : " bottles");
+  buildWelcomeSummary();
+  buildWelcomeCharts();
+  buildWelcomePanels();
 }
 
 function buildWelcome(){
   wpClearTimers();
-  buildWelcomePicker();
   buildScene();
-  buildWelcomeSummary();
-  buildWelcomeCharts();
+  buildShelf();
+  buildSubs();
+  buildWelcomeInfo();
+}
+
+function buildWelcomePanels(){
   const host = document.querySelector("#welcome-panels");
   const panels = wpPanels();
   host.innerHTML = panels.map((p,i) =>
