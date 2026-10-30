@@ -13,9 +13,13 @@
 <title>Liquid Assets</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<link rel="stylesheet" href="css/app.css?v=86405946">
+<link rel="stylesheet" href="css/app.css?v=0f962147">
 </head>
 <body>
+<!-- The scene is the page's background, fixed to the viewport and behind everything.
+     Decorative, so it is hidden from screen readers; the stage caption is the readable
+     part, and the shelf and the wake button are real controls sitting over it. -->
+<canvas class="scene-bg" id="scene" aria-hidden="true"></canvas>
 <div class="wrap">
   <header class="mast">
     <!-- The menu lives top left and the tabs live inside it. It sits faint until
@@ -35,10 +39,6 @@
 
   <section class="screen" id="s-welcome">
     <div class="hero">
-      <!-- Decorative: the scene carries no information, so it is hidden from screen
-           readers rather than described. The stage caption is the readable part, and
-           the shelf and the wake button are real controls sitting over it. -->
-      <canvas class="hero-canvas" id="scene" aria-hidden="true"></canvas>
       <h1 class="hero-title">Liquid Assets</h1>
       <!-- Invisible, but a real button: once he is out this is the only way on, and a
            canvas hit test would answer a mouse and nothing else. -->
@@ -46,8 +46,10 @@
       <div class="shelf" id="shelf"></div>
       <p class="hero-cap" id="scene-cap" aria-live="off"></p>
     </div>
-    <div class="subs" id="subs"></div>
-    <div id="welcome-info" hidden></div>
+    <div class="sheet">
+      <div class="subs" id="subs"></div>
+      <div id="welcome-info" hidden></div>
+    </div>
   </section>
 
   <section class="screen" id="s-list">
@@ -88,9 +90,9 @@
 <script src="js/screens/collection.js?v=012e21e0"></script>
 <script src="js/theme.js?v=646444ce"></script>
 <script src="js/flavour.js?v=ce9807e7"></script>
-<script src="js/nav.js?v=82ef4950"></script>
+<script src="js/nav.js?v=2e8f124f"></script>
 <script src="js/screens/welcome.js?v=ef661f75"></script>
-<script src="js/screens/welcome-scene.js?v=e0b39f91"></script>
+<script src="js/screens/welcome-scene.js?v=ee12eb80"></script>
 <script src="js/screens/welcome-shelf.js?v=06f57061"></script>
 <script src="js/shared/bottle-detail.js?v=ad5e196a"></script>
 <script src="js/screens/map.js?v=6a05987e"></script>

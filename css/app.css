@@ -204,18 +204,45 @@ h2.sec{font-family:var(--serif);font-size:19px;margin:26px 0 9px;font-weight:600
    below it stays on ordinary paper, because a moving backdrop under a data table is
    unreadable. */
 .hero{
-  position:relative;border-radius:var(--r-md);overflow:hidden;
-  border:1px solid var(--line);background:var(--paper-2);
-  height:calc(100vh - 104px);min-height:430px;max-height:780px;margin:0 0 18px;
+  position:relative;margin:0;
+  height:calc(100vh - 58px);height:calc(100dvh - 58px);min-height:430px;
 }
-.hero-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* The scene is the page's background: fixed to the viewport, behind .wrap, and painted
+   only on the welcome screen. There is no frame left to draw, because the border, the
+   radius, the height cap and the content column all stayed with the content.
+   100dvh with a 100vh fallback, or the scene jumps when a phone's toolbar hides. */
+.scene-bg{display:none}
+body.scene-on .scene-bg{
+  display:block;position:fixed;top:0;left:0;width:100%;height:100vh;height:100dvh;z-index:0;
+}
+.wrap{position:relative;z-index:1}
+.wrap.at-welcome{padding-bottom:0}
+/* Over the scene the bar cannot use --ink and --card: a bright summer sunrise would
+   swallow both. Same treatment as the title, white on a dark translucent pill. */
+.wrap.at-welcome .burger span{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.55)}
+.wrap.at-welcome .burger:hover,.wrap.at-welcome .burger[aria-expanded="true"]{
+  background:rgba(12,9,7,.55);border-color:rgba(255,255,255,.35)}
+.wrap.at-welcome .theme-btn{
+  background:rgba(12,9,7,.55);color:#fff;border-color:rgba(255,255,255,.4);
+  text-shadow:0 1px 2px rgba(0,0,0,.5);
+}
+.wrap.at-welcome .theme-btn:hover{border-color:#fff}
+/* The data sits on an opaque full-width sheet that scrolls up over the fixed scene:
+   the scene is the place, the sheet is the answer. The shadow and clip-path pair is the
+   usual way to break a block out of a centred column without touching the column. */
+.sheet{
+  display:none;background:var(--paper);padding:18px 0 64px;
+  box-shadow:0 0 0 100vmax var(--paper);clip-path:inset(0 -100vmax);
+}
+.sheet:has(.subs:not(:empty)),.sheet:has(#welcome-info:not([hidden])){display:block}
 /* A scrim under the title, and it is not decoration. The title is white so it can sit
    over the figure and the hills, but in LIGHT mode the sky is a bright sunrise and
    white on it measured unreadable. The scrim makes the contrast a property of the
    overlay rather than of whatever the scene happens to be drawing, so it cannot
    regress when the season or the theme moves the palette. */
-.hero::before{
-  content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+.hero::before{content:none}
+body.scene-on::after{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
   background:linear-gradient(170deg,rgba(12,9,7,.62) 0%,rgba(12,9,7,.26) 26%,
                              rgba(12,9,7,0) 48%,rgba(12,9,7,.30) 78%,rgba(12,9,7,.64) 100%);
 }
@@ -227,8 +254,9 @@ h2.sec{font-family:var(--serif);font-size:19px;margin:26px 0 9px;font-weight:600
 }
 /* Sits exactly over the figure and is invisible, but it is a real button: once he is
    out this is the only way on, and it has to answer the keyboard too. */
+.scene-wake.away{visibility:hidden}
 .scene-wake{
-  position:absolute;z-index:3;padding:0;border:0;background:transparent;
+  position:fixed;z-index:3;padding:0;border:0;background:transparent;
   color:transparent;font-size:0;cursor:pointer;border-radius:var(--r-md);
 }
 .scene-wake[hidden]{display:none}
@@ -286,7 +314,7 @@ h2.sec{font-family:var(--serif);font-size:19px;margin:26px 0 9px;font-weight:600
 #welcome-info[hidden]{display:none}
 
 @media (max-width:720px){
-  .hero{height:calc(100vh - 92px);min-height:400px}
+  .hero{height:calc(100vh - 58px);height:calc(100dvh - 58px);min-height:400px}
   .hero-title{font-size:clamp(28px,8.4vw,40px)}
   /* The shelf gets the full width on a phone and scrolls if six bottles will not fit,
      which is better than shrinking them to the point where the shapes stop reading. */

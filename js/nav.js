@@ -71,6 +71,10 @@ function setScreenMode(mode){
   /* The wordmark in the bar is for every screen EXCEPT welcome, where the hero already
      carries the title in full and a second copy would just be clutter. */
   document.querySelector(".wrap").classList.toggle("at-welcome", mode === "welcome");
+  /* The backdrop is painted only on the welcome screen. Everywhere else the canvas
+     is display:none and the ordinary paper background takes over, so no other
+     screen pays for it and none of them has to fight it for contrast. */
+  document.body.classList.toggle("scene-on", mode === "welcome");
   buildNav();
   if(mode === "welcome") buildWelcome();
   else if(mode === "rec") buildRec();

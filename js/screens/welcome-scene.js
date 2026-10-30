@@ -25,13 +25,18 @@
 */
 
 const SC_STAGES = [
-  {cap: "Pouring the first",   lean: 0.00, droop: 0.00, sway: 0.005, sip: 5600, bottles: 0},
-  {cap: "Settling in",         lean: 0.03, droop: 0.04, sway: 0.012, sip: 4800, bottles: 1},
-  {cap: "Warming up",          lean: 0.07, droop: 0.09, sway: 0.021, sip: 4000, bottles: 2},
-  {cap: "Merry",               lean: 0.13, droop: 0.18, sway: 0.036, sip: 3400, bottles: 3},
-  {cap: "Unsteady",            lean: 0.26, droop: 0.38, sway: 0.058, sip: 4200, bottles: 5},
-  {cap: "Out",                 lean: 0.95, droop: 0.72, sway: 0.010, sip: 0,    bottles: 7}
+  {cap: "Pouring the first",   lean: 0.00, droop: 0.00, sway: 0.005, sip: 30000, bottles: 0},
+  {cap: "Settling in",         lean: 0.03, droop: 0.04, sway: 0.012, sip: 26000, bottles: 1},
+  {cap: "Warming up",          lean: 0.07, droop: 0.09, sway: 0.021, sip: 22000, bottles: 2},
+  {cap: "Merry",               lean: 0.13, droop: 0.18, sway: 0.036, sip: 18000, bottles: 3},
+  {cap: "Unsteady",            lean: 0.26, droop: 0.38, sway: 0.058, sip: 34000, bottles: 5},
+  {cap: "Out",                 lean: 0.95, droop: 0.72, sway: 0.010, sip: 0,     bottles: 7}
 ];
+/* How long ONE raise and lower takes, independent of how often it happens.
+   This used to be 24% of the interval, which was an 816ms flick at the old 3.4s pace
+   and would have become a 7.2 SECOND slow-motion raise at the new 30s one. The gesture
+   and the frequency are two different facts and are now two different numbers. */
+const SIP_GESTURE_MS = 2200;
 /* Ten minutes end to end, so the last stage is reached at about eight and a third and
    he is out for the rest of it. Changing SC_TOTAL_MS is the only knob. */
 const SC_TOTAL_MS = 10 * 60 * 1000;
@@ -81,8 +86,13 @@ function scShade(hex, amt){
 }
 
 function scResize(){
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
   const r = scCanvas.getBoundingClientRect();
+  /* The canvas is the whole viewport now, not a 1040px box, so a flat DPR of 2 on a
+     1920x1080 screen means an 8.3 million pixel backing store repainted every frame,
+     mostly as large gradient fills. Capping by AREA keeps a phone and a laptop crisp
+     and stops a big monitor paying for detail nobody can see. */
+  const cssPx = Math.max(1, r.width * r.height);
+  const dpr = Math.min(window.devicePixelRatio || 1, cssPx > 2.2e6 ? 1.5 : 2);
   scW = Math.max(320, Math.round(r.width));
   scH = Math.max(220, Math.round(r.height));
   scCanvas.width = Math.round(scW * dpr);
@@ -167,19 +177,24 @@ function scFigure(ctx, pal, st, next, mix, t, out){
   const sipMs = st.sip + (next.sip - st.sip) * mix;
   const nb = Math.round(st.bottles + (next.bottles - st.bottles) * mix);
 
-  /* Capped on WIDTH as well as height. Height alone let a tall narrow phone scale the
-     figure to 3x, which ran the table straight off the right edge: the group spans
-     about 190 units, so the width cap is what keeps all of it in frame. The figure also
-     moves left on a narrow screen, where 0.60 of the width leaves no room for the
-     table beside it. */
-  const scale = Math.max(0.9, Math.min(2.8, scH / 190, scW / 320));
-  const gx = scW * (scW < 560 ? 0.44 : 0.60), gy = scH * 0.88;
-  // Once he is out the sway becomes a slow breath rather than a wobble.
-  const wob = out ? Math.sin(t / 2600) * 0.008
-                  : Math.sin(t / 900) * sway + Math.sin(t / 430) * sway * 0.45;
+  /* Full viewport now, so there is room for a much larger figure. Capped on width as
+     well as height because the group spans about 160 units to the right of the hip, and
+     height alone let a tall narrow phone run the table off the edge.
 
-  const ph = sipMs > 0 ? (t % sipMs) / sipMs : 1;
-  const sip = (!out && droop < 0.72 && ph < 0.24) ? Math.sin(ph / 0.24 * Math.PI) : 0;
+     gx is then pulled back far enough that the table always fits: taking 0.66 of the
+     width looks right on a wide monitor but overflows at 1280, where 0.66 plus a full
+     size table lands past the right edge. The min() is what makes one rule cover both. */
+  const scale = Math.max(0.9, Math.min(4.0, scH / 170, scW / 260));
+  const gx = Math.min(scW * 0.66, scW - 150 * scale), gy = scH * 0.86;
+  // Once he is out the sway becomes a slow breath rather than a wobble.
+  /* Periods of about 8.8s and 4.1s. They were 5.6s and 2.7s, which read as a fidget
+     rather than a sway and looked wrong beside a sip every half minute. */
+  const wob = out ? Math.sin(t / 4200) * 0.008
+                  : Math.sin(t / 1400) * sway + Math.sin(t / 650) * sway * 0.45;
+
+  const ph = sipMs > 0 ? (t % sipMs) : Infinity;
+  const sip = (!out && droop < 0.72 && ph < SIP_GESTURE_MS)
+    ? Math.sin(ph / SIP_GESTURE_MS * Math.PI) : 0;
 
   // Where the figure is on screen, so the wake button can sit over him.
   scFigBox = {x: gx - 30 * scale, y: gy - 80 * scale, w: 70 * scale, h: 86 * scale};
@@ -334,6 +349,10 @@ function scDraw(t){
 
 /* He is down. Stop the clock, park the wake button over him and leave it there. The
    button is real, so Enter and a screen reader reach it exactly as a click does. */
+/* The canvas is fixed to the viewport, so the figure's coordinates ARE viewport
+   coordinates and the button is fixed too. It is hidden once the page is scrolled past
+   the scene, because an invisible button left floating over the data would swallow
+   clicks meant for a bottle row. */
 function scSleep(){
   scAsleep = true;
   const btn = document.querySelector("#scene-wake");
@@ -343,6 +362,13 @@ function scSleep(){
   btn.style.top = Math.round(scFigBox.y) + "px";
   btn.style.width = Math.round(scFigBox.w) + "px";
   btn.style.height = Math.round(scFigBox.h) + "px";
+  scOnScroll();
+}
+
+function scOnScroll(){
+  const btn = document.querySelector("#scene-wake");
+  if(!btn || btn.hidden) return;
+  btn.classList.toggle("away", window.scrollY > window.innerHeight * 0.55);
 }
 
 function scWake(){
@@ -358,6 +384,7 @@ function scWake(){
 function scStop(){
   if(scRAF){ cancelAnimationFrame(scRAF); scRAF = null; }
   window.removeEventListener("resize", scOnResize);
+  window.removeEventListener("scroll", scOnScroll);
   document.removeEventListener("visibilitychange", scOnVis);
 }
 
@@ -414,6 +441,7 @@ function buildScene(){
   }
   scStart = performance.now();
   window.addEventListener("resize", scOnResize);
+  window.addEventListener("scroll", scOnScroll, {passive: true});
   document.addEventListener("visibilitychange", scOnVis);
   scLoop();
 }
